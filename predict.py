@@ -42,11 +42,11 @@ class Predictor(BasePredictor):
     @torch.inference_mode()
     def predict(
         self,
-        prompt: str | str[] = Input(
+        prompt: str[] = Input(
             description="Input prompt",
             default="a photo of an astronaut riding a horse on mars",
         ),
-        negative_prompt: str | str[] = Input(
+        negative_prompt: str[] = Input(
             description="Specify things to not see in the output",
             default=None,
         ),
@@ -108,8 +108,8 @@ class Predictor(BasePredictor):
 
         generator = torch.Generator("cuda").manual_seed(seed)
 
-        prompt = [prompt] * num_outputs if type(var) == str else prompt if prompt is not None else None
-        negative_prompt = [negative_prompt] * num_outputs if type(negative_prompt) == str else negative_prompt if negative_prompt is not None else None
+        prompt = [prompt[0]] * num_outputs if len(prompt) == 1 else prompt if prompt is not None else None
+        negative_prompt = [negative_prompt[0]] * num_outputs if len(negative_prompt) == 1 else negative_prompt if negative_prompt is not None else None
 
         output = self.pipe(
             prompt=prompt,
