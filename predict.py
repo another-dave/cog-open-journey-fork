@@ -42,11 +42,11 @@ class Predictor(BasePredictor):
     @torch.inference_mode()
     def predict(
         self,
-        prompt: str[] = Input(
+        prompt: List[str] = Input(
             description="Input prompt",
             default="a photo of an astronaut riding a horse on mars",
         ),
-        negative_prompt: str[] = Input(
+        negative_prompt: List[str] = Input(
             description="Specify things to not see in the output",
             default=None,
         ),
