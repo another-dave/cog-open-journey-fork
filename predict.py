@@ -43,12 +43,12 @@ class Predictor(BasePredictor):
     def predict(
         self,
         prompt: str = Input(
-            description="Input prompt",
-            default="a photo of an astronaut riding a horse on mars. (Input an array of prompts with | separator)",
+            description="Input prompt (Input an array of prompts with | separator)",
+            default="a photo of an astronaut riding a horse on mars.",
         ),
         negative_prompt: str = Input(
-            description="Specify things to not see in the output. (Input an array of negative prompts with | separator. Must match prompt legnth)",
-            default=None,
+            description="Specify things to not see in the output.",
+            default="(Input an array of negative prompts with | separator. Must match prompt length)",
         ),
         width: int = Input(
             description="Width of output image. Maximum size is 1024x768 or 768x1024 because of memory limits",
@@ -108,16 +108,20 @@ class Predictor(BasePredictor):
 
         generator = torch.Generator("cuda").manual_seed(seed)
 
-        prompts = prompt.split("|")
-        negative_prompts = negative_prompt.split("|")
+        prompts = prompt.split("|") if prompt is not None else None
+        negative_prompts = negative_prompt.split("|") if negative_prompt is not None else None
 
-        prompts_count = len(prompts)
-        neg_prompts_count = len(negative_prompts)
-        if prompts_count != neg_prompts_count:
-            raise ValueError(f"Must enter the same number of prompts as negative prompts. You entered {prompts_count} prompts but {neg_prompts_count} negative prompts"
+        prompts_count = len(prompts) if prompt is not None else 0 
+        neg_prompts_count = len(negative_prompts) if negative_prompt is not None else 0
+        if prompts_count != neg_prompts_count and neg_prompts_count > 0:
+            raise ValueError(f"Must enter the same number of prompts as negative prompts. You entered {prompts_count} prompts but {neg_prompts_count} negative prompts")
 
         prompts = [prompt] * num_outputs if prompts_count == 1 else prompt if prompt is not None else None
         negative_prompts = [negative_prompt] * num_outputs if neg_prompts_count == 1 else negative_prompt if negative_prompt is not None else None
+
+        print(f"Prompts: {prompts}")
+        print(f"negative_prompts: {negative_prompts}")
+
 
         output = self.pipe(
             prompt=prompts,
@@ -128,6 +132,8 @@ class Predictor(BasePredictor):
             generator=generator,
             num_inference_steps=num_inference_steps,
         )
+
+        print(f"Output image count: {len(output.images)}")
 
         output_paths = []
         for i, sample in enumerate(output.images):
