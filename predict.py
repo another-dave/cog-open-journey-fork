@@ -147,7 +147,7 @@ class Predictor(BasePredictor):
 
             output_path = f"/tmp/out-{i}.png"
             output_image.save(output_path)
-            output_paths.append(Path(output_path))
+            output_paths.append(output_path)
 
         if len(output_paths) == 0:
             raise Exception(
@@ -162,7 +162,7 @@ class Predictor(BasePredictor):
 
             print(f"Request: {r}")
 
-        return output_paths
+        return list(map(lambda path_as_string: Path(path_as_string, output_paths))
 
 
 def make_scheduler(name, config):
