@@ -162,7 +162,7 @@ class Predictor(BasePredictor):
 
             print(f"Request: {r}")
 
-        return list(map(lambda path_as_string: Path(path_as_string, output_paths))
+        return list(map(lambda path_as_string: Path(path_as_string, output_paths)))
 
 
 def make_scheduler(name, config):
