@@ -147,7 +147,7 @@ class Predictor(BasePredictor):
 
             output_path = f"/tmp/out-{i}.png"
             output_image.save(output_path)
-            output_paths.append(output_path)
+            output_paths.append(Path(output_path))
 
         if len(output_paths) == 0:
             raise Exception(
@@ -157,12 +157,12 @@ class Predictor(BasePredictor):
         if callback_url is not None:
             print(f"Callback to URL: {callback_url}")
             r = requests.post(callback_url, json={
-                "data": output_paths
+                "data": list(map(lambda cog_path: cog_path.__str__(), output_paths))
             })
 
             print(f"Request: {r}")
 
-        return list(map(lambda path_as_string: Path(path_as_string, output_paths)))
+        return output_paths
 
 
 def make_scheduler(name, config):
