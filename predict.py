@@ -99,8 +99,9 @@ class Predictor(BasePredictor):
             default=2,
         ),
     ) -> List[Path]:
-
+        print("About to run Report GPU")
         report_gpu()
+        print("Finish Report GPU, start to run main job")
 
         """Run a single prediction on the model"""
         if seed is None:
