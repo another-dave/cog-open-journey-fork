@@ -17,12 +17,17 @@ from diffusers.pipelines.stable_diffusion.safety_checker import (
     StableDiffusionSafetyChecker,
 )
 from PIL import ImageOps
+import gc
 
 
 MODEL_ID = "prompthero/openjourney"
 MODEL_CACHE = "diffusers-cache"
 SAFETY_MODEL_ID = "CompVis/stable-diffusion-safety-checker"
 
+def report_gpu():
+    print(torch.cuda.list_gpu_processes())
+    gc.collect()
+    torch.cuda.empty_cache()
 
 class Predictor(BasePredictor):
     def setup(self):
@@ -99,6 +104,9 @@ class Predictor(BasePredictor):
             default=2,
         ),
     ) -> List[Path]:
+
+        report_gpu()
+
         """Run a single prediction on the model"""
         if seed is None:
             seed = int.from_bytes(os.urandom(2), "big")
