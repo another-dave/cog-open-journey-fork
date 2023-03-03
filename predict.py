@@ -12,11 +12,10 @@ from diffusers import (
     EulerAncestralDiscreteScheduler,
     DPMSolverMultistepScheduler,
 )
-from diffusers.pipelines.stable_diffusion.safety_checker import (
-    StableDiffusionSafetyChecker,
-)
+from diffusers.pipelines.stable_diffusion.safety_checker import (StableDiffusionSafetyChecker)
 from PIL import ImageOps
 import gc
+import pprint
 
 
 MODEL_ID = "prompthero/openjourney"
@@ -24,12 +23,35 @@ MODEL_CACHE = "diffusers-cache"
 SAFETY_MODEL_ID = "CompVis/stable-diffusion-safety-checker"
 
 def report_gpu():
-    print(torch.cuda.list_gpu_processes())
+    print("******************************************************")
+    print("********      Start report_gpu()        **************")
+    print("******************************************************")
+    pp = pprint.PrettyPrinter(depth=4)
+    print("******************************************************")
+    print("******** Stats before GC and EmptyCache **************")
+    print("******************************************************")
+    pp.pprint(torch.cuda.list_gpu_processes())
+    pp.pprint(torch.cuda.memory_stats())
+    pp.pprint(torch.cuda.memory_summary())
     gc.collect()
+    torch.backends.cuda.cufft_plan_cache.clear()
     torch.cuda.empty_cache()
+    print("******************************************************")
+    print("******** Stats after GC and EmptyCache  **************")
+    print("******************************************************")
+    pp.pprint(torch.cuda.list_gpu_processes())
+    pp.pprint(torch.cuda.memory_stats())
+    pp.pprint(torch.cuda.memory_summary())
+    print("******************************************************")
+    print("********      End report_gpu()          **************")
+    print("******************************************************")
 
 class Predictor(BasePredictor):
     def setup(self):
+        print("******************************************************")
+        print("********             setup()            **************")
+        print("******************************************************")
+        report_gpu()
         """Load the model into memory to make running multiple predictions efficient"""
         print("Loading pipeline...")
         safety_checker = StableDiffusionSafetyChecker.from_pretrained(
@@ -39,7 +61,6 @@ class Predictor(BasePredictor):
         )
         self.pipe = StableDiffusionPipeline.from_pretrained(
             MODEL_ID,
-            safety_checker=safety_checker,
             cache_dir=MODEL_CACHE,
             local_files_only=True,
         ).to("cuda")
@@ -99,9 +120,11 @@ class Predictor(BasePredictor):
             default=2,
         ),
     ) -> List[Path]:
-        print("About to run Report GPU")
+
+        print("******************************************************")
+        print("********           predict()            **************")
+        print("******************************************************")
         report_gpu()
-        print("Finish Report GPU, start to run main job")
 
         """Run a single prediction on the model"""
         if seed is None:
