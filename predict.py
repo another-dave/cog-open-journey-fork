@@ -1,6 +1,5 @@
 import os
 from typing import List
-import requests
 
 import torch
 from cog import BasePredictor, Input, Path
@@ -48,10 +47,6 @@ class Predictor(BasePredictor):
     @torch.inference_mode()
     def predict(
         self,
-        callback_url: str = Input(
-            description="A POST URL to send results to",
-            default=None,
-        ),
         prompt: str = Input(
             description="Input prompt (Input an array of prompts with | separator)",
             default="a photo of an astronaut riding a horse on mars.",
@@ -161,14 +156,6 @@ class Predictor(BasePredictor):
             raise Exception(
                 f"NSFW content detected. Try running it again, or try a different prompt."
             )
-
-        if callback_url is not None:
-            print(f"Callback to URL: {callback_url}")
-            r = requests.post(callback_url, json={
-                "data": list(map(lambda cog_path: cog_path.__str__(), output_paths))
-            })
-
-            print(f"Request: {r}")
 
         return output_paths
 
